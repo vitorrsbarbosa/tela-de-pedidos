@@ -14,19 +14,8 @@
   </div>
   <div class="form-container" id="newOrderForm">
     <h3>Adicionar Novo Pedido</h3>
-
-    <!--
-    <label for="orderNumber">Número do Pedido:</label>
-    <input type="text" id="orderNumber" placeholder="Digite o número do pedido" disabled>
-    -->
-
     <label for="items">Itens (separados por vírgula):</label>
     <input type="text" id="items" placeholder="Ex: Cheeseburger, Batata Frita, Refrigerante">
-
-    <!--
-    <label for="total">Total (em R$):</label>
-    <input type="text" id="total" placeholder="Digite o total do pedido" disabled>
-    -->
 
     <label for="customerName">Nome do Cliente:</label>
     <input type="text" id="customerName" placeholder="Digite o nome do cliente">
@@ -52,19 +41,19 @@
 
   <div id="ordersList" class="orders-container">
     <div class="order-section" id="clienteEmLoja">
-      <h2>Cliente em Loja</h2>
+      <h2>Cliente em Loja - Tempo Limite: 10 minutos</h2>
       <hr>
       <!-- Lista de Pedidos para "Cliente em Loja" vai aparecer aqui -->
     </div>
 
     <div class="order-section" id="paraBuscar">
-      <h2>Para Buscar</h2>
+      <h2>Para Buscar - Tempo Limite: 2 horas</h2>
       <hr>
       <!-- Lista de Pedidos para "Para Buscar" vai aparecer aqui -->
     </div>
 
     <div class="order-section" id="paraEntregar">
-      <h2>Para Entregar</h2>
+      <h2>Para Entregar - Tempo Limite: 24 horas</h2>
       <hr>
       <!-- Lista de Pedidos para "Para Entregar" vai aparecer aqui -->
     </div>

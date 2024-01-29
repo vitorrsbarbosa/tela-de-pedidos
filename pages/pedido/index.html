@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -9,58 +9,41 @@
 </head>
 
 <body>
-  <div class="toggle-form-container" onclick="toggleFormVisibility()">
-    <span class="toggle-text">Novo Pedido</span>
-  </div>
-  <div class="form-container" id="newOrderForm">
-    <h3>Adicionar Novo Pedido</h3>
-    <label for="items">Itens (separados por vírgula):</label>
-    <input type="text" id="items" placeholder="Ex: Cheeseburger, Batata Frita, Refrigerante">
+  <button id="toggleMenuBtn">Toggle Menu</button>
 
-    <label for="customerName">Nome do Cliente:</label>
-    <input type="text" id="customerName" placeholder="Digite o nome do cliente">
-
-    <label for="customerAddress">Endereço do Cliente:</label>
-    <input type="text" id="customerAddress" placeholder="Digite o endereço do cliente">
-
-    <label for="customerPhone">Telefone do Cliente:</label>
-    <input type="text" id="customerPhone" placeholder="Digite o telefone do cliente">
-
-    <label for="customerEmail">Email do Cliente:</label>
-    <input type="text" id="customerEmail" placeholder="Digite o email do cliente">
-
-    <label for="tipoEntrega">Tipo de Entrega:</label>
-    <select id="tipoEntrega">
-      <option value="clienteEmLoja">Cliente em Loja</option>
-      <option value="paraBuscar">Para Buscar</option>
-      <option value="paraEntregar">Entrega</option>
-    </select>
-
-    <button onclick="addNewOrder()">Adicionar Pedido</button>
-  </div>
-
-  <div id="ordersList" class="orders-container">
-    <div class="order-section" id="clienteEmLoja">
-      <h2>Cliente em Loja - Tempo Limite: 10 minutos</h2>
-      <hr>
-      <!-- Lista de Pedidos para "Cliente em Loja" vai aparecer aqui -->
+  <div id="menu" class="hidden">
+    <input type="text" id="orderNumberInput" placeholder="Número do Pedido">
+    <input type="text" id="invoiceNumberInput" placeholder="Número da Nota Fiscal">
+    <input type="text" id="itemCountInput" placeholder="Quantidade de Itens">
+    <input type="text" id="sellerNameInput" placeholder="Nome do Vendedor">
+    <div>
+      <label for="prioritySelect">Prioridade:</label>
+      <select id="prioritySelect">
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
     </div>
 
-    <div class="order-section" id="paraBuscar">
-      <h2>Para Buscar - Tempo Limite: 2 horas</h2>
-      <hr>
-      <!-- Lista de Pedidos para "Para Buscar" vai aparecer aqui -->
+    <button id="addOrderBtn">Adicionar Pedido</button>
+  </div>
+
+  <div class="order-container" id="orderContainer">
+    <!-- Pedidos serão adicionados dinamicamente aqui -->
+    <div id="highPriorityContainer" class="priority-container">
+      <h2>Alta Prioridade | Tempo limite: 10 minutos</h2>
     </div>
 
-    <div class="order-section" id="paraEntregar">
-      <h2>Para Entregar - Tempo Limite: 24 horas</h2>
-      <hr>
-      <!-- Lista de Pedidos para "Para Entregar" vai aparecer aqui -->
+    <div id="mediumPriorityContainer" class="priority-container">
+      <h2>Média Prioridade | Tempo limite: 2 horas</h2>
+    </div>
+
+    <div id="lowPriorityContainer" class="priority-container">
+      <h2>Baixa Prioridade | Tempo limite: 24 horas</h2>
     </div>
   </div>
 
   <script src="app.js"></script>
-
 </body>
 
 </html>

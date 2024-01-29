@@ -1,233 +1,139 @@
-let orderCounter = 1;
-let listaDePedidosAtivos = [];
-function addOrder(items, customer, tipoEntrega) {
-  const ordersList = document.getElementById(tipoEntrega);
+document.addEventListener("DOMContentLoaded", function () {
+  const ordersData = [
+    { orderNumber: 1, invoiceNumber: 12345, itemCount: 3, sellerName: 'Vendedor 1', priority: 'high' },
+    { orderNumber: 2, invoiceNumber: 67890, itemCount: 2, sellerName: 'Vendedor 2', priority: 'medium' },
+    { orderNumber: 3, invoiceNumber: 75148, itemCount: 2, sellerName: 'Vendedor 2', priority: 'low' },
+    { orderNumber: 4, invoiceNumber: 86426, itemCount: 10, sellerName: 'Vendedor 1', priority: 'high' },
+    // Adicione mais dados conforme necessário
+  ];
 
-  const orderObj = {
-    numeroPedido: orderCounter,
-    status: "Em andamento",
-    tempoAtivo: 0, // Inicializa o tempo ativo em segundos
-    tempoLimite: calcularTempoLimite(tipoEntrega), // Adiciona o tempo limite ao objeto
-    intervalId: null, // Armazena o ID do intervalo
-  };
+  const orderContainer = document.getElementById('orderContainer');
+  const timerContainer = document.getElementById('timerContainer');
+  const toggleMenuBtn = document.getElementById('toggleMenuBtn');
+  const menu = document.getElementById('menu');
+  const addOrderBtn = document.getElementById('addOrderBtn');
+  const orderNumberInput = document.getElementById('orderNumberInput');
+  const invoiceNumberInput = document.getElementById('invoiceNumberInput');
+  const itemCountInput = document.getElementById('itemCountInput');
+  const sellerNameInput = document.getElementById('sellerNameInput');
+  const prioritySelect = document.getElementById('prioritySelect');
 
-  const tempoAtivoFormatado = formatTime(orderObj.tempoAtivo)
+  function formatWaitingTime(waitingTime) {
+    const hours = Math.floor(waitingTime / 3600);
+    const minutes = Math.floor((waitingTime % 3600) / 60);
+    const seconds = waitingTime % 60;
 
-  const orderContainer = buildOrderContainer(orderCounter, tempoAtivoFormatado, orderObj, items, customer);
+    // Adiciona zeros à esquerda, se necessário
+    const formatedHours = hours.toString().padStart(2, '0');
+    const formatedMinutes = minutes.toString().padStart(2, '0');
+    const formatedSeconds = seconds.toString().padStart(2, '0');
 
-  ordersList.appendChild(orderContainer);
-  orderCounter++;
-
-  // Inicia a atualização do tempo ativo
-  orderObj.intervalId = setInterval(() => updateActiveTime(orderObj, orderContainer), 1000);
-
-  listaDePedidosAtivos.push(orderObj);
-}
-
-function updateActiveTime(orderObj, orderContainer) {
-  orderObj.tempoAtivo++;
-
-  // Verifica se o tempo ativo ultrapassou o tempo limite
-  if (orderObj.tempoAtivo > orderObj.tempoLimite) {
-    orderObj.status = "Expirado";
-    const orderStatus = orderContainer.querySelector(".orderStatus");
-    orderStatus.textContent = "Expirado";
-    finishOrder(orderObj, orderContainer);
-  }
-}
-
-function finishOrder(orderObj, orderContainer) {
-  // Para o intervalo se ainda estiver ativo
-  clearInterval(orderObj.intervalId);
-
-  // Remove o pedido da lista
-  orderContainer.remove();
-}
-
-function removeOrder(button, event) {
-  const orderContainer = button.parentNode;
-  const ordersList = orderContainer.parentNode;
-  ordersList.removeChild(orderContainer);
-
-  // Evita que o evento se propague e cause problemas no HTML
-  event.stopPropagation();
-}
-
-function addNewOrder() {
-  const items = document.getElementById("items").value.split(',').map(item => item.trim());
-  const customer = {
-    name: document.getElementById("customerName").value,
-    address: document.getElementById("customerAddress").value,
-    phone: document.getElementById("customerPhone").value,
-    email: document.getElementById("customerEmail").value,
-  }
-  const tipoEntrega = document.getElementById("tipoEntrega").value
-
-  if (!items || items.length === 0 || !customer.name || !customer.address || !customer.phone || !customer.email || !tipoEntrega) {
-    alert("Por favor, preencha todos os campos do formulário.");
-    return;
+    return `${formatedHours}:${formatedMinutes}:${formatedSeconds}`;
   }
 
-  addOrder(items, customer, tipoEntrega);
-}
+  function createOrder(order) {
+    const orderDiv = document.createElement('div');
+    orderDiv.classList.add('order');
 
-function updateOrderStatus(button, event) {
-  const orderContainer = button.closest(".order-container");
-  const progressBar = orderContainer.querySelector(".progress-bar-inner");
-  const orderStatus = orderContainer.querySelector(".orderStatus");
+    const orderInfo = document.createElement('p');
+    orderInfo.innerHTML = `Pedido #${order.orderNumber} | NF #${order.invoiceNumber} | Itens: ${order.itemCount} | Vendedor: ${order.sellerName}`;
 
-  // Recupera orderObj do atributo de dados (data attribute) do botão
-  const orderObjString = button.dataset.orderObj;
+    const waitingTime = document.createElement('p');
+    waitingTime.classList.add('waiting-time');
 
-  if (!orderObjString) {
-    console.error("Objeto de pedido não encontrado.");
-    return;
+    let remainingTime;
+    switch (order.priority) {
+      case 'high': remainingTime = 10 * 60; break;
+      case 'medium': remainingTime = 120 * 60; break;
+      case 'low': remainingTime = 1440 * 60; break;
+      default: remainingTime = 10 * 60;
+    }
+
+    function updateTimer() {
+      if (remainingTime > 0) {
+        remainingTime--;
+        waitingTime.innerHTML = `Tempo de espera: ${formatWaitingTime(remainingTime)}`;
+      } else {
+        clearInterval(timerInterval);
+        waitingTime.innerHTML = 'Pedido finalizado!';
+      }
+    }
+
+    const timerInterval = setInterval(updateTimer, 1000) // Atualiza a cada minuto
+
+    const removeIcon = document.createElement('span');
+    removeIcon.innerHTML = '🗑️';
+    removeIcon.style.cursor = 'pointer';
+    removeIcon.addEventListener('click', function () {
+      clearInterval(timerInterval);
+      orderContainer.removeChild(orderDiv);
+    });
+
+    orderDiv.appendChild(orderInfo);
+    orderDiv.appendChild(waitingTime);
+    orderDiv.appendChild(removeIcon);
+
+    // Adiciona o pedido à div de prioridade correta
+    const priorityContainer = document.getElementById(`${order.priority.toLowerCase()}PriorityContainer`);
+    if (priorityContainer) {
+      priorityContainer.appendChild(orderDiv);
+    }
+
   }
 
-  const orderObj = JSON.parse(orderObjString);
+  function toggleMenu() {
+    menu.classList.toggle('hidden');
+  }
 
-  let currentProgress = parseInt(progressBar.style.width) || 0;
-  if (currentProgress < 100) {
-    currentProgress += 25;
-    progressBar.style.width = currentProgress + "%";
-    progressBar.textContent = currentProgress + "%";
-    if (currentProgress === 100) {
-      orderObj.status = "Concluído";
-      orderStatus.textContent = "Concluído";
+  function addNewOrder() {
+    const orderNumber = orderNumberInput.value;
+    const invoiceNumber = invoiceNumberInput.value;
+    const itemCount = itemCountInput.value;
+    const sellerName = sellerNameInput.value;
+    const priority = prioritySelect.value;
 
-      // Chama a função para finalizar o pedido
-      finishOrder(orderObj, orderContainer);
+    if (orderNumber && invoiceNumber && itemCount && sellerName && priority) {
+      const newOrder = {
+        orderNumber: parseInt(orderNumber),
+        invoiceNumber: parseInt(invoiceNumber),
+        itemCount: parseInt(itemCount),
+        sellerName: sellerName,
+        priority: priority,
+      };
+
+      // Adiciona o pedido ao contêiner correspondente com base na prioridade
+      const priorityContainer = document.getElementById(`${priority.toLowerCase()}PriorityContainer`);
+
+      if (priorityContainer) {
+        createOrder(newOrder);
+      } else {
+        console.error(`Container de prioridade não encontrado para ${priority}`);
+      }
+
+      // Limpa os campos de entrada após adicionar o pedido
+      orderNumberInput.value = '';
+      invoiceNumberInput.value = '';
+      itemCountInput.value = '';
+      sellerNameInput.value = '';
     } else {
-      orderStatus.textContent = "Em andamento";
+      alert('Por favor, preencha todos os campos.');
     }
   }
 
-  // Evita que o evento se propague e cause problemas no HTML
-  event.stopPropagation();
-}
-
-function toggleVisibility(element) {
-  const hiddenElement = element.querySelector('.hidden');
-  hiddenElement.classList.toggle('visible');
-
-  // const detailsElement = element.querySelector('.hidden');
-  // const isHidden = detailsElement.classList.contains('hidden');
-
-  // if (isHidden) {
-  //   detailsElement.classList.remove('hidden');
-  // } else {
-  //   detailsElement.classList.add('hidden');
-  // }
-}
-
-function formatPhoneNumber(phoneNumber) {
-  if (!phoneNumber) return ''; // Tratar o caso em que o número de telefone é nulo ou indefinido
-
-  // Ajuste o formato do número de telefone conforme necessário
-  // Neste exemplo, estamos adicionando parênteses e hífens
-  const formattedNumber = phoneNumber.toString().replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-  return formattedNumber;
-}
-
-function emptyText() {
-  document.getElementById('items').value = null
-  document.getElementById('customerName').value = null
-  document.getElementById('customerAddress').value = null
-  document.getElementById('customerPhone').value = null
-  document.getElementById('customerEmail').value = null
-}
-
-function toggleFormVisibility() {
-  const formContainer = document.getElementById('newOrderForm');
-  formContainer.style.display = formContainer.style.display === 'none' ? 'block' : 'none';
-}
-
-function calcularTempoLimite(tipoEntrega) {
-  switch (tipoEntrega) {
-    case 'clienteEmLoja':
-      return 10; // 10 minutos
-    case 'paraBuscar':
-      return 2 * 60; // 2 horas
-    case 'paraEntregar':
-      return 24 * 60; // 24 horas
-    default:
-      return 0;
+  function initializeOrders() {
+    // Adiciona cada pedido à página
+    ordersData.forEach(function (order) {
+      const priorityContainer = document.getElementById(`${order.priority.toLowerCase()}PriorityContainer`);
+      if (priorityContainer) {
+        createOrder(order);
+      }
+    });
   }
-}
 
-function formatLimitTime(tempoLimiteEmMinutos) {
-  const horas = Math.floor(tempoLimiteEmMinutos / 60);
-  const minutos = tempoLimiteEmMinutos % 60;
+  // Adiciona funções aos eventos
+  toggleMenuBtn.addEventListener('click', toggleMenu);
+  addOrderBtn.addEventListener('click', addNewOrder);
 
-  return `${horas}:${minutos}`
-}
-
-function formatTime(tempoEmSegundos) {
-  const horas = Math.floor(tempoEmSegundos / 3600);
-  const minutos = Math.floor((tempoEmSegundos % 3600) / 60);
-  const segundos = tempoEmSegundos % 60;
-
-  // Adiciona zeros à esquerda, se necessário
-  const horasFormatadas = horas.toString().padStart(2, '0');
-  const minutosFormatados = minutos.toString().padStart(2, '0');
-  const segundosFormatados = segundos.toString().padStart(2, '0');
-
-  return `${horasFormatadas}:${minutosFormatados}:${segundosFormatados}`;
-}
-
-function buildOrderContainer(orderCounter, activeTimeElement, orderObj, items, customer) {
-  const orderContainer = document.createElement("div");
-
-  orderContainer.className = "order-container";
-
-  orderContainer.innerHTML = `
-  <p>
-    <h2>Número do Pedido: <span>${orderCounter}</span></h2>
-    <h4>Tempo Ativo: ${activeTimeElement}</h4>
-    <div class="order-status">Status do Pedido: <span class="orderStatus">${orderObj.status}</span></div>
-      <div class="progress-bar">
-        <div class="progress-bar-inner">0%</div>
-      </div>
-
-      <div class="order-details" onclick="toggleVisibility(this)">
-        <h3>Detalhes do Pedido</h3>
-        <div class="hidden">
-          <ul class="item-list">
-          ${Array.isArray(items) ? items.map(item => `<li class="item">${item}</li>`).join('') : ''}
-          </ul>
-        </div>
-      </div>
-
-      <div class="customer-info" onclick="toggleVisibility(this)">
-        <h3>Informações do Cliente</h3>
-        <div class="hidden">
-          <p><strong>Nome:</strong> ${customer.name}</p>
-          <p><strong>Endereço:</strong> ${customer.address}</p>
-          <p><strong>Telefone:</strong> ${formatPhoneNumber(customer.phone)}</p>
-          <p><strong>Email:</strong> ${customer.email}</p>
-        </div>
-      </div>
-    </p>
-  `;
-
-  const orderButton = document.createElement("button");
-  orderButton.textContent = "Atualizar status";
-
-  const removeOrderButton = document.createElement("button");
-  removeOrderButton.textContent = "Remover Pedido";
-
-  // Adicionar orderObj como um atributo de dados
-  orderButton.dataset.orderObj = JSON.stringify(orderObj);
-
-  orderButton.addEventListener("click", function (event) {
-    updateOrderStatus(this, event);
-  });
-
-  removeOrderButton.addEventListener("click", function (event) {
-    removeOrder(this, event)
-  })
-
-  orderContainer.appendChild(orderButton);
-  orderContainer.appendChild(removeOrderButton);
-  return orderContainer;
-}
+  // Inicializa os pedidos
+  initializeOrders();
+});

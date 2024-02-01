@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", function () {
   ];
 
   const orderContainer = document.getElementById('orderContainer');
-  const timerContainer = document.getElementById('timerContainer');
   const toggleMenuBtn = document.getElementById('toggleMenuBtn');
   const menu = document.getElementById('menu');
   const addOrderBtn = document.getElementById('addOrderBtn');
